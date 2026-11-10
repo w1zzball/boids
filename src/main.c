@@ -88,16 +88,6 @@ void renderBoids(Boid *boids) {
   }
 }
 
-void moveBoids(Boid *boids) {
-  Vector2 v1, v2, v3;
-  for (int i = 0; i < num_boids; i++) {
-    v1 = rule1(i, boids);
-    v2 = rule2(i, boids);
-    v3 = rule3(i, boids);
-    boids[i].velocity = boids[i].velocity + v1 + v2 + v3;
-    boids[i].position = boids[i].position + boids[i].velocity;
-  }
-}
 Vector2 rule1(int j, Boid *boids) {
   Vector2 pc_j;
   for (int i = 0; i < num_boids; i++) {
@@ -106,6 +96,17 @@ Vector2 rule1(int j, Boid *boids) {
     }
     pc_j = divV(pc_j, (num_boids - 1));
     return divV(subV(pc_j, boids[j].position), 100);
+  }
+}
+
+void moveBoids(Boid *boids) {
+  Vector2 v1, v2, v3;
+  for (int i = 0; i < num_boids; i++) {
+    v1 = rule1(i, boids);
+    v2 = rule2(i, boids);
+    v3 = rule3(i, boids);
+    boids[i].velocity = addV(addV(addV(boids[i].velocity, v1), v2), v3);
+    boids[i].position = addV(boids[i].position, boids[i].velocity);
   }
 }
 
