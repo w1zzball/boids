@@ -13,11 +13,12 @@ typedef struct {
 } Boid;
 
 bool gravityOn = true;
-const int num_boids = 90;
+const int num_boids = 190;
 const int pull = 500;
 const int separation = 5;
 const int vel_scale = 2;
 const double gravScale = 90;
+const double velLimit = 10;
 
 Vector2 addV(Vector2 a, Vector2 b) {
   Vector2 _v = {a.x + b.x, a.y + b.y};
@@ -154,6 +155,18 @@ void moveBoids(Boid *boids) {
   }
 }
 
+void limitVelocity(Boid *b) {
+  if (lenV(b->velocity) > velLimit) {
+    b->velocity = multV(normaliseV(b->velocity), velLimit);
+  }
+}
+
+void limitBoids(Boid *boids) {
+  for (int i = 0; i < num_boids; i++) {
+    limitVelocity(&boids[i]);
+  }
+}
+
 int main() {
 
   SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
@@ -178,6 +191,7 @@ int main() {
     ClearBackground(BLACK);
     if (frame % 2 == 0) {
       moveBoids(boids);
+      limitBoids(boids);
     }
     renderBoids(boids);
     EndDrawing();
