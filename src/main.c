@@ -19,6 +19,7 @@ const int separation = 5;
 const int vel_scale = 2;
 const double gravScale = 90;
 const double velLimit = 10;
+const float binding_strength = 10;
 
 Vector2 addV(Vector2 a, Vector2 b) {
   Vector2 _v = {a.x + b.x, a.y + b.y};
@@ -140,17 +141,35 @@ Vector2 mouseGravity(Boid b) {
               r * r);
 }
 
+Vector2 bound_boid(Boid b) {
+  Vector2 v = {0, 0};
+  if (b.position.x <= 0) {
+    v.x = binding_strength;
+  }
+  if (b.position.x > GetScreenWidth()) {
+    v.x = -binding_strength;
+  }
+  if (b.position.y <= 0) {
+    v.y = binding_strength;
+  }
+  if (b.position.y > GetScreenHeight()) {
+    v.y = -binding_strength;
+  }
+  return v;
+}
+
 void moveBoids(Boid *boids) {
-  Vector2 v1, v2, v3, v4;
+  Vector2 v1, v2, v3, v4, v5;
   Vector2 zero = {0, 0};
   for (int i = 0; i < num_boids; i++) {
     v1 = rule1(i, boids);
     v2 = rule2(i, boids);
     v3 = rule3(i, boids);
     v4 = gravityOn ? mouseGravity(boids[i]) : zero;
+    v5 = bound_boid(boids[i]);
 
     boids[i].velocity =
-        addV(addV(addV(addV(boids[i].velocity, v1), v2), v3), v4);
+        addV(addV(addV(addV(addV(boids[i].velocity, v1), v2), v3), v4), v5);
     boids[i].position = addV(boids[i].position, boids[i].velocity);
   }
 }
@@ -161,7 +180,7 @@ void limitVelocity(Boid *b) {
   }
 }
 
-void limitBoids(Boid *boids) {
+void limitBoids(Boid *boids) { // limit boid speed
   for (int i = 0; i < num_boids; i++) {
     limitVelocity(&boids[i]);
   }
