@@ -10,9 +10,10 @@ typedef struct {
   Vector2 velocity;
 } Boid;
 
-const int num_boids = 50;
-const int pull = 100;
-const int separation = 100;
+const int num_boids = 90;
+const int pull = 500;
+const int separation = 10;
+const int vel_scale = 4;
 
 Vector2 addV(Vector2 a, Vector2 b) {
   Vector2 _v = {a.x + b.x, a.y + b.y};
@@ -99,7 +100,7 @@ Vector2 rule1(int j, Boid *boids) {
       pc_j = addV(pc_j, boids[i].position);
     }
     pc_j = divV(pc_j, (num_boids - 1));
-    return divV(subV(pc_j, boids[j].position), 100);
+    return divV(subV(pc_j, boids[j].position), pull);
   }
 }
 
@@ -112,8 +113,18 @@ Vector2 rule2(int j, Boid *boids) {
       }
     }
   }
-
   return c;
+}
+
+Vector2 rule3(int j, Boid *boids) {
+  Vector2 pv_j = {0, 0};
+  for (int i = 0; i < num_boids; i++) {
+    if (i != j) {
+      pv_j = addV(pv_j, boids[i].velocity);
+    }
+  }
+  pv_j = divV(pv_j, (num_boids - 1));
+  return divV(subV(pv_j, boids[j].velocity), 8);
 }
 
 void moveBoids(Boid *boids) {
@@ -131,6 +142,8 @@ int main() {
 
   SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
   InitWindow(800, 600, "boids");
+  SetTargetFPS(60); // Set target FPS (maximum)
+
   int HEIGHT = GetScreenHeight();
   int WIDTH = GetScreenWidth();
   float theta = 0;
@@ -139,6 +152,7 @@ int main() {
   srand(time(NULL));
   initBoids(boids);
   SearchAndSetResourceDir("resources");
+  int frame = 0;
   while (!WindowShouldClose()) // run the loop until the user presses ESCAPE or
   // presses the Close button on the window
   {
@@ -146,18 +160,18 @@ int main() {
     // drawing
     BeginDrawing();
     ClearBackground(BLACK);
-    Vector2 mouse = GetMousePosition();
-
-    float u_x = sin(theta);
-    float u_y = cos(theta);
-    Vector2 v = {u_x, u_y};
-    Vector2 p = {WIDTH / 2, HEIGHT / 2};
-    Boid b = {mouse, v};
-    renderBoid(&b);
-    printf("%d\n", boids[0].position.x);
+    // Vector2 mouse = GetMousePosition();
+    // float u_x = sin(theta);
+    // float u_y = cos(theta);
+    // Vector2 v = {u_x, u_y};
+    // Vector2 p = {WIDTH / 2, HEIGHT / 2};
+    // Boid b = {mouse, v};
+    // renderBoid(&b);
+    moveBoids(boids);
     renderBoids(boids);
-    theta += 0.01f;
+    // theta += 0.01f;
     EndDrawing();
+    frame++;
   }
 
   // cleanup
