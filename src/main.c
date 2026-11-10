@@ -2,11 +2,15 @@
 #include "resource_dir.h" // utility header for SearchAndSetResourceDir
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 typedef struct {
   Vector2 position;
   Vector2 velocity;
 } Boid;
+
+const int num_boids = 50;
 
 Vector2 addV(Vector2 a, Vector2 b) {
   Vector2 _v = {a.x + b.x, a.y + b.y};
@@ -65,18 +69,39 @@ void renderBoid(Boid *b) {
   Vector2 vert3 = addV(base, wing);
   DrawTriangle(vert1, vert2, vert3, WHITE);
 }
-const int num_boids = 10;
+
+void initBoids(Boid *boids) {
+
+  for (int i = 0; i < num_boids; i++) {
+    Vector2 pos = {rand() % GetScreenWidth(), rand() % GetScreenHeight()};
+    Vector2 vel = {rand() % 10 - 5, rand() % 10 - 5};
+    boids[i] = (Boid){pos, vel};
+    ;
+  }
+}
+
+void renderBoids(Boid *boids) {
+  for (int i = 0; i < num_boids; i++) {
+    renderBoid(&boids[i]);
+  }
+}
 
 int main() {
+
   SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
   InitWindow(800, 600, "boids");
   int HEIGHT = GetScreenHeight();
   int WIDTH = GetScreenWidth();
   float theta = 0;
+  // allocate memory for boids array
+  Boid *boids = (Boid *)malloc(sizeof(Boid[num_boids]));
+  srand(time(NULL));
+  initBoids(boids);
   SearchAndSetResourceDir("resources");
   while (!WindowShouldClose()) // run the loop until the user presses ESCAPE or
-                               // presses the Close button on the window
+  // presses the Close button on the window
   {
+
     // drawing
     BeginDrawing();
     ClearBackground(BLACK);
@@ -88,6 +113,8 @@ int main() {
     Vector2 p = {WIDTH / 2, HEIGHT / 2};
     Boid b = {mouse, v};
     renderBoid(&b);
+    printf("%d\n", boids[0].position.x);
+    renderBoids(boids);
     theta += 0.01f;
     EndDrawing();
   }
@@ -97,5 +124,6 @@ int main() {
 
   // destroy the window and cleanup the OpenGL context
   CloseWindow();
+  free(boids);
   return 0;
 }
