@@ -31,6 +31,8 @@ Vector2 flipV(Vector2 v) {
   return _v;
 }
 
+Vector2 subV(Vector2 a, Vector2 b) { return addV(a, flipV(b)); }
+
 Vector2 normaliseV(Vector2 v) {
   double len = lenV(v);
   if (len == 0) {
@@ -83,6 +85,27 @@ void initBoids(Boid *boids) {
 void renderBoids(Boid *boids) {
   for (int i = 0; i < num_boids; i++) {
     renderBoid(&boids[i]);
+  }
+}
+
+void moveBoids(Boid *boids) {
+  Vector2 v1, v2, v3;
+  for (int i = 0; i < num_boids; i++) {
+    v1 = rule1(i, boids);
+    v2 = rule2(i, boids);
+    v3 = rule3(i, boids);
+    boids[i].velocity = boids[i].velocity + v1 + v2 + v3;
+    boids[i].position = boids[i].position + boids[i].velocity;
+  }
+}
+Vector2 rule1(int j, Boid *boids) {
+  Vector2 pc_j;
+  for (int i = 0; i < num_boids; i++) {
+    if (i != j) {
+      pc_j = addV(pc_j, boids[i].position);
+    }
+    pc_j = divV(pc_j, (num_boids - 1));
+    return divV(subV(pc_j, boids[j].position), 100);
   }
 }
 
