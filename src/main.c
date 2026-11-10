@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+// TODO add buttons to reset, sliders to adjust variables
+
 typedef struct {
   Vector2 position;
   Vector2 velocity;
@@ -132,7 +134,6 @@ Vector2 mouseGravity(Boid b) {
   bool mouseDown = IsMouseButtonDown(0);
   Vector2 v_g;
   Vector2 mouse = GetMousePosition();
-  // Gmm/r^
   double r = distV(mouse, b.position);
   return divV(multV(subV(mouse, b.velocity), gravScale * (mouseDown ? 10 : 1)),
               r * r);
@@ -175,18 +176,10 @@ int main() {
     // drawing
     BeginDrawing();
     ClearBackground(BLACK);
-    // Vector2 mouse = GetMousePosition();
-    // float u_x = sin(theta);
-    // float u_y = cos(theta);
-    // Vector2 v = {u_x, u_y};
-    // Vector2 p = {WIDTH / 2, HEIGHT / 2};
-    // Boid b = {mouse, v};
-    // renderBoid(&b);
     if (frame % 2 == 0) {
       moveBoids(boids);
     }
     renderBoids(boids);
-    // theta += 0.01f;
     EndDrawing();
     frame++;
   }
