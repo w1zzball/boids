@@ -10,10 +10,12 @@ typedef struct {
   Vector2 velocity;
 } Boid;
 
+bool gravityOn = true;
 const int num_boids = 90;
 const int pull = 500;
 const int separation = 10;
 const int vel_scale = 4;
+const double gravScale = 90;
 
 Vector2 addV(Vector2 a, Vector2 b) {
   Vector2 _v = {a.x + b.x, a.y + b.y};
@@ -126,14 +128,25 @@ Vector2 rule3(int j, Boid *boids) {
   pv_j = divV(pv_j, (num_boids - 1));
   return divV(subV(pv_j, boids[j].velocity), 8);
 }
+Vector2 mouseGravity(Boid b) {
+  Vector2 v_g;
+  Vector2 mouse = GetMousePosition();
+  // Gmm/r^
+  double r = distV(mouse, b.position);
+  return divV(multV(subV(mouse, b.velocity), gravScale), r * r);
+}
 
 void moveBoids(Boid *boids) {
-  Vector2 v1, v2, v3;
+  Vector2 v1, v2, v3, v4;
+  Vector2 zero = {0, 0};
   for (int i = 0; i < num_boids; i++) {
     v1 = rule1(i, boids);
     v2 = rule2(i, boids);
     v3 = rule3(i, boids);
-    boids[i].velocity = addV(addV(addV(boids[i].velocity, v1), v2), v3);
+    v4 = gravityOn ? mouseGravity(boids[i]) : zero;
+
+    boids[i].velocity =
+        addV(addV(addV(addV(boids[i].velocity, v1), v2), v3), v4);
     boids[i].position = addV(boids[i].position, boids[i].velocity);
   }
 }
@@ -167,7 +180,9 @@ int main() {
     // Vector2 p = {WIDTH / 2, HEIGHT / 2};
     // Boid b = {mouse, v};
     // renderBoid(&b);
-    moveBoids(boids);
+    if (frame % 2 == 0) {
+      moveBoids(boids);
+    }
     renderBoids(boids);
     // theta += 0.01f;
     EndDrawing();
