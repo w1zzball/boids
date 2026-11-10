@@ -49,7 +49,7 @@ Vector2 multV(Vector2 v, double s) {
 }
 
 void renderBoid(Boid *b) {
-  const float size = 30.0f;
+  const float size = 10.0f;
   Vector2 pos = b->position;
   Vector2 direction = normaliseV(b->velocity);
   if (direction.x == 0 && direction.y == 0) {
@@ -65,14 +65,14 @@ void renderBoid(Boid *b) {
   Vector2 vert3 = addV(base, wing);
   DrawTriangle(vert1, vert2, vert3, WHITE);
 }
+const int num_boids = 10;
 
 int main() {
   SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
   InitWindow(800, 600, "boids");
   int HEIGHT = GetScreenHeight();
   int WIDTH = GetScreenWidth();
-  // Utility function from resource_dir.h to find the resources folder and set
-  // it as the current working directory so we can load from it
+  float theta = 0;
   SearchAndSetResourceDir("resources");
   while (!WindowShouldClose()) // run the loop until the user presses ESCAPE or
                                // presses the Close button on the window
@@ -82,19 +82,13 @@ int main() {
     ClearBackground(BLACK);
     Vector2 mouse = GetMousePosition();
 
-    Vector2 v = {10, 10};
+    float u_x = sin(theta);
+    float u_y = cos(theta);
+    Vector2 v = {u_x, u_y};
     Vector2 p = {WIDTH / 2, HEIGHT / 2};
-    Boid b = {p, v};
+    Boid b = {mouse, v};
     renderBoid(&b);
-    // DrawTriangle(A, mouse, C, WHITE); // Draw a color-filled triangle,
-    // counter-clockwise vertex order
-    // draw some text using the default font
-    // DrawText("Hello Raylib", 200, 200, 20, WHITE);
-
-    // draw our texture to the screen
-
-    // end the frame and get ready for the next one  (display frame, poll input,
-    // etc...)
+    theta += 0.01f;
     EndDrawing();
   }
 
