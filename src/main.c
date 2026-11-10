@@ -11,6 +11,8 @@ typedef struct {
 } Boid;
 
 const int num_boids = 50;
+const int pull = 100;
+const int separation = 100;
 
 Vector2 addV(Vector2 a, Vector2 b) {
   Vector2 _v = {a.x + b.x, a.y + b.y};
@@ -54,6 +56,8 @@ Vector2 multV(Vector2 v, double s) {
   return _v;
 }
 
+double distV(Vector2 a, Vector2 b) { return lenV(subV(a, b)); }
+
 void renderBoid(Boid *b) {
   const float size = 10.0f;
   Vector2 pos = b->position;
@@ -89,7 +93,7 @@ void renderBoids(Boid *boids) {
 }
 
 Vector2 rule1(int j, Boid *boids) {
-  Vector2 pc_j;
+  Vector2 pc_j = {0, 0};
   for (int i = 0; i < num_boids; i++) {
     if (i != j) {
       pc_j = addV(pc_j, boids[i].position);
@@ -97,6 +101,19 @@ Vector2 rule1(int j, Boid *boids) {
     pc_j = divV(pc_j, (num_boids - 1));
     return divV(subV(pc_j, boids[j].position), 100);
   }
+}
+
+Vector2 rule2(int j, Boid *boids) {
+  Vector2 c = {0, 0};
+  for (int i = 0; i < num_boids; i++) {
+    if (i != j) {
+      if (distV(boids[i].position, boids[j].position) < separation) {
+        c = subV(c, subV(boids[i].position, boids[j].position));
+      }
+    }
+  }
+
+  return c;
 }
 
 void moveBoids(Boid *boids) {
