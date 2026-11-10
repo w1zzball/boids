@@ -13,8 +13,8 @@ typedef struct {
 bool gravityOn = true;
 const int num_boids = 90;
 const int pull = 500;
-const int separation = 10;
-const int vel_scale = 4;
+const int separation = 5;
+const int vel_scale = 2;
 const double gravScale = 90;
 
 Vector2 addV(Vector2 a, Vector2 b) {
@@ -129,11 +129,13 @@ Vector2 rule3(int j, Boid *boids) {
   return divV(subV(pv_j, boids[j].velocity), 8);
 }
 Vector2 mouseGravity(Boid b) {
+  bool mouseDown = IsMouseButtonDown(0);
   Vector2 v_g;
   Vector2 mouse = GetMousePosition();
   // Gmm/r^
   double r = distV(mouse, b.position);
-  return divV(multV(subV(mouse, b.velocity), gravScale), r * r);
+  return divV(multV(subV(mouse, b.velocity), gravScale * (mouseDown ? 10 : 1)),
+              r * r);
 }
 
 void moveBoids(Boid *boids) {
