@@ -10,16 +10,20 @@
 typedef struct {
   Vector2 position;
   Vector2 velocity;
+  Color col;
 } Boid;
 
+const float upper_col_bound = 360;
+const float lower_col_bound = 0;
 bool gravityOn = true;
 const int num_boids = 190;
-const int pull = 500;
-const int separation = 5;
-const int vel_scale = 2;
-const double gravScale = 90;
+const int pull = 100;
+const int separation = 10;
+const int vel_scale = 8;
+const double gravScale = 100;
 const double velLimit = 10;
-const float binding_strength = 10;
+const float binding_strength = 10; // OOB push
+const float colour_smooth = 500.0f;
 
 Vector2 addV(Vector2 a, Vector2 b) {
   Vector2 _v = {a.x + b.x, a.y + b.y};
@@ -80,7 +84,7 @@ void renderBoid(Boid *b) {
   Vector2 vert1 = tip;
   Vector2 vert2 = addV(base, flipV(wing));
   Vector2 vert3 = addV(base, wing);
-  DrawTriangle(vert1, vert2, vert3, WHITE);
+  DrawTriangle(vert1, vert2, vert3, b->col);
 }
 
 void initBoids(Boid *boids) {
@@ -88,7 +92,8 @@ void initBoids(Boid *boids) {
   for (int i = 0; i < num_boids; i++) {
     Vector2 pos = {rand() % GetScreenWidth(), rand() % GetScreenHeight()};
     Vector2 vel = {rand() % 10 - 5, rand() % 10 - 5};
-    boids[i] = (Boid){pos, vel};
+    Color init_col = ColorFromHSV(100.0f, 1.0f, 1.0f);
+    boids[i] = (Boid){pos, vel, init_col};
     ;
   }
 }
@@ -105,9 +110,11 @@ Vector2 rule1(int j, Boid *boids) {
     if (i != j) {
       pc_j = addV(pc_j, boids[i].position);
     }
-    pc_j = divV(pc_j, (num_boids - 1));
-    return divV(subV(pc_j, boids[j].position), pull);
   }
+  pc_j = divV(pc_j, (num_boids - 1));
+  float newHue = 360.0f * (distV(pc_j, boids[j].position) / colour_smooth);
+  boids[j].col = ColorFromHSV(newHue, 1.0f, 1.0f);
+  return divV(subV(pc_j, boids[j].position), pull);
 }
 
 Vector2 rule2(int j, Boid *boids) {
@@ -137,7 +144,7 @@ Vector2 mouseGravity(Boid b) {
   Vector2 v_g;
   Vector2 mouse = GetMousePosition();
   double r = distV(mouse, b.position);
-  return divV(multV(subV(mouse, b.velocity), gravScale * (mouseDown ? 10 : 1)),
+  return divV(multV(subV(mouse, b.velocity), gravScale * (mouseDown ? 2 : 1)),
               r * r);
 }
 
