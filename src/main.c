@@ -22,7 +22,7 @@ const int vel_scale = 2;
 const double gravScale = 100;
 const double velLimit = 10;
 const float binding_strength = 10;
-const float col_smooth = 500.0f;
+const float col_smooth = 300.0f;
 
 Vector2 addV(Vector2 a, Vector2 b)
 {
